@@ -11,8 +11,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-// For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
-
 namespace Yasas.API
 {
     [Route("api/[controller]")]
@@ -45,7 +43,7 @@ namespace Yasas.API
                     Error = OpenIdConnectConstants.Errors.UnsupportedGrantType,
                     ErrorDescription = "Grant type not supported."
                 });
-
+            
             var user = await _userManager.FindByNameAsync(req.Username);
             if (user == null)
             {
@@ -65,6 +63,7 @@ namespace Yasas.API
                 });
             }
 
+            //check if 2 factors auth is activated
             if (_userManager.SupportsUserTwoFactor && await _userManager.GetTwoFactorEnabledAsync(user))
             {
                 return BadRequest(new OpenIdConnectResponse
@@ -73,7 +72,8 @@ namespace Yasas.API
                     ErrorDescription = "User is not allowed to sign in"
                 });
             }
-
+            
+            //Check user account is not locked
             if (_userManager.SupportsUserLockout && await _userManager.IsLockedOutAsync(user))
             {
                 return BadRequest(new OpenIdConnectResponse

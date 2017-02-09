@@ -10,19 +10,27 @@ namespace Yasas.API
 {
     public class Startup
     {
+        public IConfigurationRoot Configuration { get; set; }
+
+        public Startup(IHostingEnvironment env)
+        {
+            Configuration = new ConfigurationBuilder()
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables()
+                .Build();
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            var configuration = new ConfigurationBuilder()
-                            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
-                            .Build();
-
             services.AddMvcCore();
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
+                options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]);
                 options.UseOpenIddict();
             });
 
