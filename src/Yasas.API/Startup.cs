@@ -1,18 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using OpenIddict;
-using OpenIddict.Models;
-using OpenIddict.EntityFrameworkCore;
-using OpenIddict.Core;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 
 namespace Yasas.API
 {
@@ -22,29 +14,34 @@ namespace Yasas.API
         // For more information on how to configure your application, visit http://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc();
+            var configuration = new ConfigurationBuilder()
+                            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                            .Build();
+
+            services.AddMvcCore();
 
             services.AddDbContext<AppDbContext>(options =>
             {
-                options.UseSqlServer("");
+                options.UseSqlServer(configuration["ConnectionStrings:DefaultConnection"]);
                 options.UseOpenIddict();
             });
 
             services.AddIdentity<AppUser, IdentityRole>()
-                    .AddUserStore<AppUser>()
-                    .AddRoleStore<IdentityRole>()
+                    .AddEntityFrameworkStores<AppDbContext>()
                     .AddDefaultTokenProviders();
 
             services.AddOpenIddict()
                     .AddEntityFrameworkCoreStores<AppDbContext>()
+                    .AddMvcBinders()
                     .EnableTokenEndpoint("/connect/token")
                     .EnableLogoutEndpoint("/connect/logout")
                     .AllowPasswordFlow()
                     .AllowRefreshTokenFlow()
-                    .Configure(config => {
+                    .Configure(config =>
+                    {
                         config.ApplicationCanDisplayErrors = true;
                     })
-                    .DisableHttpsRequirement();                    
+                    .DisableHttpsRequirement();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
