@@ -62,6 +62,10 @@ namespace Yasas.API
             {
                 app.UseDeveloperExceptionPage();
             }
+            else
+            {
+                app.UseExceptionHandler("/Home/Error");
+            }
 
             //app.Run(async (context) =>
             //{
@@ -74,7 +78,16 @@ namespace Yasas.API
 
             app.UseOpenIddict(); //needs to be after UseIdentity()
 
+            //app.UseMvc(routes =>
+            //{
+            //    routes.MapRoute(
+            //        name: "default",
+            //        template: "{controller=Home}/{action=Index}/{id?}");
+            //});
+
             app.UseMvcWithDefaultRoute();
+
+            app.UseStaticFiles();
         }
     }
 }
