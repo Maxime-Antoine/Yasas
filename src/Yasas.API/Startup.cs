@@ -27,7 +27,9 @@ namespace Yasas.API
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvcCore()
-                    .AddJsonFormatters();
+                    .AddJsonFormatters()
+                    .AddViews()
+                    .AddRazorViewEngine();
 
             services.AddDbContext<AppDbContext>(options =>
             {

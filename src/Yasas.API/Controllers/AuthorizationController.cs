@@ -31,7 +31,7 @@ namespace Yasas.API
         }
 
         [HttpPost("~/connect/token"), Produces("application/json")]
-        public async Task<IActionResult> POST(OpenIdConnectRequest req)
+        public async Task<IActionResult> Post(OpenIdConnectRequest req)
         {
             Debug.Assert(req.IsTokenRequest(),
                "The OpenIddict binder for ASP.NET Core MVC is not registered. " +
