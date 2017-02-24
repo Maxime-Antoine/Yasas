@@ -1,5 +1,16 @@
-﻿@{
-    ViewData["Title"] = "Home";
+﻿@{ 
+    ViewData["Title"] = "Yet Another Simple Authentication Service";
 }
 
-<h1>Hello Core!</h1>
+<div ng-app="Yasas">
+</div>
+
+@section scripts
+{
+    <environment names="Development">
+        <script type="text/javascript" src="~/js/app.js"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script type="text/javascript" src="~/js/app.min.js"></script>
+    </environment>
+}
