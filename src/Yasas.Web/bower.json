@@ -4,6 +4,7 @@
   "dependencies": {
     "bootstrap": "3.3.7",
     "jQuery": "3.1.1",
-    "angular": "1.6.2"
+    "angular": "1.6.2",
+    "angular-route": "1.6.2"
   }
 }

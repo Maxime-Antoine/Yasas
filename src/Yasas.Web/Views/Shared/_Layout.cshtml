@@ -29,6 +29,7 @@
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
         <script src="~/lib/angular/angular.js"></script>
+        <script src="~/lib/angular-route/angular-route.js"></script>
     </environment>
     <environment names="Staging,Production">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
@@ -42,6 +43,10 @@
         <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.2/angular.min.js"
                 asp-fallback-src="~/lib/angular/angular.min.js"
                 asp-fallback-test="window.angular">
+        </script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.2/angular-route.js"
+                asp-fallback-src="~/lib/angular-route/angular-route.js"
+                asp-fallback-test="window.angular.module('ngRoute')">
         </script>
     </environment>
 

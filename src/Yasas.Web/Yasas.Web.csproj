@@ -25,6 +25,10 @@
 
   <ItemGroup>
     <Content Include="wwwroot\js\app.js" />
+    <Content Include="wwwroot\js\services\authenticationService.js" />
+    <Content Include="wwwroot\templates\home.html" />
+    <Content Include="wwwroot\templates\login.html" />
+    <Content Include="wwwroot\templates\admin.html" />
   </ItemGroup>
 
   <ItemGroup>

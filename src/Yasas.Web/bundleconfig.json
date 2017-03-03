@@ -11,7 +11,8 @@
   {
     "outputFileName": "wwwroot/js/app.min.js",
     "inputFiles": [
-      "wwwroot/js/app.js"
+      "wwwroot/js/app.js",
+      "wwwroot/js/services/authenticationService.js"
     ],
     // Optionally specify minification options
     "minify": {
