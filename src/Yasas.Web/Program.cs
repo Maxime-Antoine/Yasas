@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using System.IO;
 
-namespace Yasas.API
+namespace Yasas.Web
 {
     public class Program
     {

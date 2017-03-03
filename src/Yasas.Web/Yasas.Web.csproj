@@ -3,13 +3,24 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <PreserveCompilationContext>true</PreserveCompilationContext>
-    <AssemblyName>Yasas.API</AssemblyName>
-    <OutputType>Exe</OutputType>
-    <PackageId>Yasas.API</PackageId>
+    <AssemblyName>Yasas.Web</AssemblyName>
+    <OutputType>exe</OutputType>
+    <PackageId>YASAS.Web</PackageId>
     <UserSecretsId>aspnet-Yasas.API-20170209104018</UserSecretsId>
     <RuntimeIdentifiers>win7-x86</RuntimeIdentifiers>
     <RuntimeFrameworkVersion>1.1.0</RuntimeFrameworkVersion>
     <PackageTargetFallback>$(PackageTargetFallback);dotnet5.6;portable-net45+win8</PackageTargetFallback>
+    <ApplicationIcon />
+    <OutputTypeEx>exe</OutputTypeEx>
+    <StartupObject />
+    <Authors>Maxime Antoine</Authors>
+    <Company />
+    <Product>YASAS</Product>
+    <Description />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Prefer32Bit>False</Prefer32Bit>
   </PropertyGroup>
 
   <ItemGroup>

@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Yasas.Web.Models;
 
-namespace Yasas.API
+namespace Yasas.Web.Db
 {
     public class AppDbContext : IdentityDbContext<AppUser>
     {
@@ -24,7 +25,4 @@ namespace Yasas.API
             base.OnModelCreating(builder);
         }
     }
-
-    public class AppUser : IdentityUser
-    { }
 }

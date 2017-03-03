@@ -5,8 +5,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Yasas.Web.Db;
+using Yasas.Web.Models;
 
-namespace Yasas.API
+namespace Yasas.Web
 {
     public class Startup
     {

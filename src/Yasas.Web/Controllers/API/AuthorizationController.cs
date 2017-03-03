@@ -10,8 +10,9 @@ using OpenIddict.Models;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Yasas.Web.Models;
 
-namespace Yasas.API
+namespace Yasas.Web.Controllers.API
 {
     [Route("api/[controller]")]
     public class AuthorizationController : Controller
@@ -43,7 +44,7 @@ namespace Yasas.API
                     Error = OpenIdConnectConstants.Errors.UnsupportedGrantType,
                     ErrorDescription = "Grant type not supported."
                 });
-            
+
             var user = await _userManager.FindByNameAsync(req.Username);
             if (user == null)
             {
@@ -72,7 +73,7 @@ namespace Yasas.API
                     ErrorDescription = "User is not allowed to sign in"
                 });
             }
-            
+
             //Check user account is not locked
             if (_userManager.SupportsUserLockout && await _userManager.IsLockedOutAsync(user))
             {
