@@ -6,9 +6,6 @@ namespace Yasas.Web.Db
 {
     public class AppDbContext : IdentityDbContext<AppUser>
     {
-        private static object _migrationLock = new object();
-        private static bool _migrated = false;
-
         public AppDbContext(DbContextOptions options) : base(options)
         { }
 
