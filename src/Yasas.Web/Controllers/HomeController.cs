@@ -1,11 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 
 namespace Yasas.Web.Controllers
 {
     public class HomeController : Controller
     {
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
+        {
+            return View();
+        }
+
+        public IActionResult Error()
         {
             return View();
         }
