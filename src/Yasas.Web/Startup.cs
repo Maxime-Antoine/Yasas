@@ -20,7 +20,7 @@ namespace Yasas.Web
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables()
+                .AddEnvironmentVariables(prefix: "ASPNETCORE")
                 .Build();
         }
 
@@ -92,6 +92,13 @@ namespace Yasas.Web
             app.UseMvcWithDefaultRoute();
 
             app.UseStaticFiles();
+
+            //create & seed database
+            using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
+            {
+                var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
+                context.Database.EnsureCreated();
+            }
         }
     }
 }

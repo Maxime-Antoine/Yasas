@@ -24,6 +24,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="wwwroot\css\Site.css" />
     <Content Include="wwwroot\js\app.js" />
     <Content Include="wwwroot\js\services\authenticationService.js" />
     <Content Include="wwwroot\templates\home.html" />
@@ -68,6 +69,10 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.EntityFrameworkCore.Tools.DotNet" Version="1.1.0-*" />
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="1.0.0-msbuild3-final" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="wwwroot\js\services\authenticationService.js" />
   </ItemGroup>
 
 </Project>

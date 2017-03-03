@@ -10,15 +10,7 @@ namespace Yasas.Web.Db
         private static bool _migrated = false;
 
         public AppDbContext(DbContextOptions options) : base(options)
-        {
-            if (!_migrated)
-                lock(_migrationLock)
-                    if (!_migrated)
-                    {
-                        Database.Migrate();
-                        _migrated = true;
-                    }
-        }
+        { }
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
