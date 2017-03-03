@@ -71,27 +71,11 @@ namespace Yasas.Web
                 app.UseExceptionHandler("/Home/Error");
             }
 
-            //app.Run(async (context) =>
-            //{
-            //    await context.Response.WriteAsync("Hello World!");
-            //});
-
-            app.UseIdentity();
-
-            app.UseOAuthValidation();
-
-            app.UseOpenIddict(); //needs to be after UseIdentity()
-
-            //app.UseMvc(routes =>
-            //{
-            //    routes.MapRoute(
-            //        name: "default",
-            //        template: "{controller=Home}/{action=Index}/{id?}");
-            //});
-
-            app.UseMvcWithDefaultRoute();
-
-            app.UseStaticFiles();
+            app.UseIdentity()
+               .UseOAuthValidation()
+               .UseOpenIddict() //needs to be after UseIdentity()
+               .UseMvcWithDefaultRoute()
+               .UseStaticFiles();
 
             //create & seed database
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
