@@ -7,8 +7,10 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Core;
 using OpenIddict.Models;
+using System;
 using System.Diagnostics;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Yasas.Web.Models;
 
@@ -104,9 +106,18 @@ namespace Yasas.Web.Controllers.API
             }
 
             // Create a new authentication ticket.
-            var ticket = await CreateTicketAsync(req, user);
+            //var ticket = await CreateTicketAsync(req, user);
 
-            return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+            //return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+
+            var identity = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationScheme, OpenIdConnectConstants.Claims.Name, null);
+            identity.AddClaim(OpenIdConnectConstants.Claims.Subject, Guid.NewGuid().ToString(), OpenIdConnectConstants.Destinations.AccessToken);
+            identity.AddClaim(OpenIdConnectConstants.Claims.Issuer, "YASAS", OpenIdConnectConstants.Destinations.AccessToken);
+            identity.AddClaim(OpenIdConnectConstants.Claims.Username, user.UserName, OpenIdConnectConstants.Destinations.AccessToken);
+
+            var principal = new ClaimsPrincipal(identity);
+
+            return SignIn(principal, OpenIdConnectServerDefaults.AuthenticationScheme);
         }
 
         private async Task<AuthenticationTicket> CreateTicketAsync(

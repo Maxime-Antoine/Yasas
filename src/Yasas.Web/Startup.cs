@@ -1,10 +1,14 @@
 ﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Yasas.Web.Db;
 using Yasas.Web.Models;
 
@@ -20,7 +24,7 @@ namespace Yasas.Web
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
-                .AddEnvironmentVariables(prefix: "ASPNETCORE")
+                .AddEnvironmentVariables()
                 .Build();
         }
 
@@ -50,11 +54,13 @@ namespace Yasas.Web
                     .EnableLogoutEndpoint("/connect/logout")
                     .AllowPasswordFlow()
                     .AllowRefreshTokenFlow()
+                    .UseJsonWebTokens()
+                    .AddEphemeralSigningKey() //DEV only
                     .Configure(config =>
                     {
                         config.ApplicationCanDisplayErrors = true;
                     })
-                    .DisableHttpsRequirement();
+                    .DisableHttpsRequirement(); //DEV only
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -63,13 +69,9 @@ namespace Yasas.Web
             loggerFactory.AddConsole();
 
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
             else
-            {
                 app.UseExceptionHandler("/Home/Error");
-            }
 
             app.UseIdentity()
                .UseOAuthValidation()
@@ -80,9 +82,48 @@ namespace Yasas.Web
             //create & seed database
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
-                var context = serviceScope.ServiceProvider.GetService<AppDbContext>();
-                context.Database.EnsureCreated();
+                var db = serviceScope.ServiceProvider.GetService<AppDbContext>();
+                db.Database.EnsureDeleted(); //DEBUG
+                db.Database.EnsureCreated();
+                _SeedIdentityAsync(app.ApplicationServices).Wait();
             }
+        }
+
+        private async Task _SeedIdentityAsync(IServiceProvider serviceProvider)
+        {
+            var db = serviceProvider.GetRequiredService<AppDbContext>();
+            var roleStore = new RoleStore<IdentityRole>(db);
+            var userStore = new UserStore<AppUser>(db);
+
+            if (!roleStore.Roles.Any(r => r.Name == "Admin"))
+                await roleStore.CreateAsync(new IdentityRole() { Name = "Admin", NormalizedName = "ADMIN" });
+
+            var user = new AppUser
+            {
+                FirstName = "Super",
+                LastName = "User",
+                UserName = "Admin",
+                NormalizedUserName = "ADMIN",
+                Email = "test@test.com",
+                NormalizedEmail = "TEST@TEST.com",
+                EmailConfirmed = true,
+                SecurityStamp = Guid.NewGuid().ToString("D")
+            };
+
+            if(!userStore.Users.Any(u => u.UserName == user.UserName))
+            {
+                var hasher = new PasswordHasher<AppUser>();
+                var hashedPassword = hasher.HashPassword(user, "Test123");
+                user.PasswordHash = hashedPassword;
+
+                await userStore.CreateAsync(user);
+
+                var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
+                var dbUser = await userManager.FindByNameAsync(user.UserName);
+                await userManager.AddToRoleAsync(dbUser, "Admin");
+            }
+
+            await db.SaveChangesAsync();
         }
     }
 }
