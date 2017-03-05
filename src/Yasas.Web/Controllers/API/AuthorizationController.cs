@@ -66,8 +66,8 @@ namespace Yasas.Web.Controllers.API
                 });
             }
 
-            //check if 2 factors auth is activated
-            if (_userManager.SupportsUserTwoFactor && await _userManager.GetTwoFactorEnabledAsync(user))
+            //Check user account is not locked
+            if (_userManager.SupportsUserLockout && await _userManager.IsLockedOutAsync(user))
             {
                 return BadRequest(new OpenIdConnectResponse
                 {
@@ -76,22 +76,10 @@ namespace Yasas.Web.Controllers.API
                 });
             }
 
-            //Check user account is not locked
-            if (_userManager.SupportsUserLockout && await _userManager.IsLockedOutAsync(user))
-            {
-                return BadRequest(new OpenIdConnectResponse
-                {
-                    Error = OpenIdConnectConstants.Errors.InvalidGrant,
-                    ErrorDescription = "Invalid credentials"
-                });
-            }
-
             if (!await _userManager.CheckPasswordAsync(user, req.Password))
             {
                 if (_userManager.SupportsUserLockout)
-                {
                     await _userManager.AccessFailedAsync(user);
-                }
 
                 return BadRequest(new OpenIdConnectResponse
                 {
@@ -101,23 +89,21 @@ namespace Yasas.Web.Controllers.API
             }
 
             if (_userManager.SupportsUserLockout)
-            {
                 await _userManager.ResetAccessFailedCountAsync(user);
-            }
 
             // Create a new authentication ticket.
-            //var ticket = await CreateTicketAsync(req, user);
+            var ticket = await CreateTicketAsync(req, user);
 
-            //return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
+            return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
 
-            var identity = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationScheme, OpenIdConnectConstants.Claims.Name, null);
-            identity.AddClaim(OpenIdConnectConstants.Claims.Subject, Guid.NewGuid().ToString(), OpenIdConnectConstants.Destinations.AccessToken);
-            identity.AddClaim(OpenIdConnectConstants.Claims.Issuer, "YASAS", OpenIdConnectConstants.Destinations.AccessToken);
-            identity.AddClaim(OpenIdConnectConstants.Claims.Username, user.UserName, OpenIdConnectConstants.Destinations.AccessToken);
+            //var identity = new ClaimsIdentity(OpenIdConnectServerDefaults.AuthenticationScheme, OpenIdConnectConstants.Claims.Name, null);
+            //identity.AddClaim(OpenIdConnectConstants.Claims.Subject, Guid.NewGuid().ToString(), OpenIdConnectConstants.Destinations.AccessToken);
+            //identity.AddClaim(OpenIdConnectConstants.Claims.Issuer, "YASAS", OpenIdConnectConstants.Destinations.AccessToken);
+            //identity.AddClaim(OpenIdConnectConstants.Claims.Username, user.UserName, OpenIdConnectConstants.Destinations.AccessToken);
 
-            var principal = new ClaimsPrincipal(identity);
+            //var principal = new ClaimsPrincipal(identity);
 
-            return SignIn(principal, OpenIdConnectServerDefaults.AuthenticationScheme);
+            //return SignIn(principal, OpenIdConnectServerDefaults.AuthenticationScheme);
         }
 
         private async Task<AuthenticationTicket> CreateTicketAsync(
@@ -132,14 +118,14 @@ namespace Yasas.Web.Controllers.API
             // To allow OpenIddict to serialize them, you must attach them a destination, that specifies
             // whether they should be included in access tokens, in identity tokens or in both.
 
-            foreach (var claim in principal.Claims)
-            {
-                // In this sample, every claim is serialized in both the access and the identity tokens.
-                // In a real world application, you'd probably want to exclude confidential claims
-                // or apply a claims policy based on the scopes requested by the client application.
-                claim.SetDestinations(OpenIdConnectConstants.Destinations.AccessToken,
-                                      OpenIdConnectConstants.Destinations.IdentityToken);
-            }
+            //foreach (var claim in principal.Claims)
+            //{
+            //    // In this sample, every claim is serialized in both the access and the identity tokens.
+            //    // In a real world application, you'd probably want to exclude confidential claims
+            //    // or apply a claims policy based on the scopes requested by the client application.
+            //    claim.SetDestinations(OpenIdConnectConstants.Destinations.AccessToken,
+            //                          OpenIdConnectConstants.Destinations.IdentityToken);
+            //}
 
             // Create a new authentication ticket holding the user identity.
             var ticket = new AuthenticationTicket(principal, properties,

@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -35,7 +37,8 @@ namespace Yasas.Web
             services.AddMvcCore()
                     .AddJsonFormatters()
                     .AddViews()
-                    .AddRazorViewEngine();
+                    .AddRazorViewEngine()
+                    .AddAuthorization();
 
             services.AddDbContext<AppDbContext>(options =>
             {
@@ -54,11 +57,11 @@ namespace Yasas.Web
                     .EnableLogoutEndpoint("/connect/logout")
                     .AllowPasswordFlow()
                     .AllowRefreshTokenFlow()
-                    .UseJsonWebTokens()
+                    //.UseJsonWebTokens()
                     .AddEphemeralSigningKey() //DEV only
                     .Configure(config =>
                     {
-                        config.ApplicationCanDisplayErrors = true;
+                        config.ApplicationCanDisplayErrors = true; //DEV only
                     })
                     .DisableHttpsRequirement(); //DEV only
         }
@@ -78,7 +81,7 @@ namespace Yasas.Web
                .UseOpenIddict() //needs to be after UseIdentity()
                .UseMvcWithDefaultRoute()
                .UseStaticFiles();
-
+            
             //create & seed database
             using (var serviceScope = app.ApplicationServices.GetRequiredService<IServiceScopeFactory>().CreateScope())
             {
@@ -121,6 +124,8 @@ namespace Yasas.Web
                 var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                 var dbUser = await userManager.FindByNameAsync(user.UserName);
                 await userManager.AddToRoleAsync(dbUser, "Admin");
+
+                await userManager.AddClaimAsync(dbUser, new System.Security.Claims.Claim("sub", dbUser.UserName));
             }
 
             await db.SaveChangesAsync();
