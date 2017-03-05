@@ -41,6 +41,7 @@
 
   <ItemGroup>
     <PackageReference Include="AspNet.Security.OAuth.Validation" Version="1.0.0-*" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication" Version="1.1.0" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration" Version="1.1.0-preview4-final" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="1.1.0-msbuild3-final" />
     <PackageReference Include="OpenIddict" Version="1.0.0-*" />
