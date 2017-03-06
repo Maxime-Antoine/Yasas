@@ -24,6 +24,8 @@ namespace Yasas.Web
 
         public Startup(IHostingEnvironment env)
         {
+            Environment = env;
+
             Configuration = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -88,8 +90,6 @@ namespace Yasas.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            Environment = env;
-
             loggerFactory.AddConsole();
 
             if (env.IsDevelopment())

@@ -91,7 +91,7 @@ namespace Yasas.Web.Controllers.API
                     await _userManager.ResetAccessFailedCountAsync(user);
 
                 // Create a new authentication ticket.
-                var ticket = await CreateTicketAsync(req, user);
+                var ticket = await _CreateTicketAsync(req, user);
 
                 if (req.Resource != null)
                     ticket.SetAudiences(new string[] { req.Resource });
