@@ -103,9 +103,9 @@ namespace Yasas.Web
                    {
                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["SIGNINGKEY"])),
                        ValidateIssuer = true,
-                       ValidIssuer = "http://localhost:5000/",
+                       ValidIssuer = Configuration["URL"],
                        ValidateAudience = true,
-                       ValidAudience = "http://localhost:5000/"
+                       ValidAudience = Configuration["URL"]
                    }
                })
                .UseOpenIddict()
@@ -160,7 +160,6 @@ namespace Yasas.Web
                 await userManager.AddToRoleAsync(dbUser, "User");
 
                 await userManager.AddClaimAsync(dbUser, new Claim("sub", dbUser.UserName));
-                //await userManager.AddClaimAsync(dbUser, new Claim("roles", "Admin"));
             }
 
             await db.SaveChangesAsync();

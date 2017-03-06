@@ -21,6 +21,7 @@
       "launchUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
+        "URL": "http://localhost:5000/",
         "SIGNINGKEY": "YasasSuperSecret"
       },
       "applicationUrl": "http://localhost:5000"
