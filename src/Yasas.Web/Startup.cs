@@ -19,7 +19,8 @@ namespace Yasas.Web
 {
     public class Startup
     {
-        public IConfigurationRoot Configuration { get; set; }
+        public IConfigurationRoot Configuration { get; private set; }
+        public IHostingEnvironment Environment { get; private set; }
 
         public Startup(IHostingEnvironment env)
         {
@@ -41,8 +42,6 @@ namespace Yasas.Web
                     .AddRazorViewEngine()
                     .AddAuthorization();
 
-            //services.AddMvc();
-
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]);
@@ -53,29 +52,44 @@ namespace Yasas.Web
                     .AddEntityFrameworkStores<AppDbContext>()
                     .AddDefaultTokenProviders();
 
-            var signinSecret = "yasasSuperSecret";
-            var signinKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(signinSecret));
+            var signinKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["SIGNINGKEY"]));
 
-            services.AddOpenIddict()
-                    .AddEntityFrameworkCoreStores<AppDbContext>()
-                    .AddMvcBinders()
-                    .EnableTokenEndpoint("/connect/token")
-                    .EnableLogoutEndpoint("/connect/logout")
-                    .AllowPasswordFlow()
-                    .AllowRefreshTokenFlow()
-                    .UseJsonWebTokens()
-                    //.AddEphemeralSigningKey() //DEV only
-                    .AddSigningKey(signinKey)
-                    .Configure(config =>
-                    {
-                        config.ApplicationCanDisplayErrors = true; //DEV only
-                    })
-                    .DisableHttpsRequirement(); //DEV only
+            if (Environment.IsDevelopment())
+            {
+                services.AddOpenIddict()
+                        .AddEntityFrameworkCoreStores<AppDbContext>()
+                        .AddMvcBinders()
+                        .EnableTokenEndpoint("/connect/token")
+                        .EnableLogoutEndpoint("/connect/logout")
+                        .AllowPasswordFlow()
+                        .AllowRefreshTokenFlow()
+                        .UseJsonWebTokens()
+                        .AddSigningKey(signinKey)
+                        .Configure(config =>
+                        {
+                            config.ApplicationCanDisplayErrors = true;
+                        })
+                        .DisableHttpsRequirement();
+            }
+            else
+            {
+                services.AddOpenIddict()
+                        .AddEntityFrameworkCoreStores<AppDbContext>()
+                        .AddMvcBinders()
+                        .EnableTokenEndpoint("/connect/token")
+                        .EnableLogoutEndpoint("/connect/logout")
+                        .AllowPasswordFlow()
+                        .AllowRefreshTokenFlow()
+                        .UseJsonWebTokens()
+                        .AddSigningKey(signinKey);
+            }
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
+            Environment = env;
+
             loggerFactory.AddConsole();
 
             if (env.IsDevelopment())
@@ -83,13 +97,11 @@ namespace Yasas.Web
             else
                 app.UseExceptionHandler("/Home/Error");
 
-            app//.UseIdentity()
-               //.UseOAuthValidation(options => options.AutomaticAuthenticate = true)
-               .UseJwtBearerAuthentication(new JwtBearerOptions {
+            app.UseJwtBearerAuthentication(new JwtBearerOptions {
                    AutomaticAuthenticate = true,
                    TokenValidationParameters = new TokenValidationParameters
                    {
-                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("yasasSuperSecret")),
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(Configuration["SIGNINGKEY"])),
                        ValidateIssuer = true,
                        ValidIssuer = "http://localhost:5000/",
                        ValidateAudience = true,
