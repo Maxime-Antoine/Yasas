@@ -11,6 +11,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using Yasas.Web.Db;
 using Yasas.Web.Models;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 
 namespace Yasas.Web
 {
@@ -38,6 +41,8 @@ namespace Yasas.Web
                     .AddRazorViewEngine()
                     .AddAuthorization();
 
+            //services.AddMvc();
+
             services.AddDbContext<AppDbContext>(options =>
             {
                 options.UseSqlServer(Configuration["ConnectionStrings:DefaultConnection"]);
@@ -48,6 +53,9 @@ namespace Yasas.Web
                     .AddEntityFrameworkStores<AppDbContext>()
                     .AddDefaultTokenProviders();
 
+            var signinSecret = "yasasSuperSecret";
+            var signinKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(signinSecret));
+
             services.AddOpenIddict()
                     .AddEntityFrameworkCoreStores<AppDbContext>()
                     .AddMvcBinders()
@@ -55,8 +63,9 @@ namespace Yasas.Web
                     .EnableLogoutEndpoint("/connect/logout")
                     .AllowPasswordFlow()
                     .AllowRefreshTokenFlow()
-                    //.UseJsonWebTokens()
-                    .AddEphemeralSigningKey() //DEV only
+                    .UseJsonWebTokens()
+                    //.AddEphemeralSigningKey() //DEV only
+                    .AddSigningKey(signinKey)
                     .Configure(config =>
                     {
                         config.ApplicationCanDisplayErrors = true; //DEV only
@@ -74,9 +83,20 @@ namespace Yasas.Web
             else
                 app.UseExceptionHandler("/Home/Error");
 
-            app.UseIdentity()
-               .UseOAuthValidation()
-               .UseOpenIddict() //needs to be after UseIdentity()
+            app//.UseIdentity()
+               //.UseOAuthValidation(options => options.AutomaticAuthenticate = true)
+               .UseJwtBearerAuthentication(new JwtBearerOptions {
+                   AutomaticAuthenticate = true,
+                   TokenValidationParameters = new TokenValidationParameters
+                   {
+                       IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("yasasSuperSecret")),
+                       ValidateIssuer = true,
+                       ValidIssuer = "http://localhost:5000/",
+                       ValidateAudience = true,
+                       ValidAudience = "http://localhost:5000/"
+                   }
+               })
+               .UseOpenIddict()
                .UseMvcWithDefaultRoute()
                .UseStaticFiles();
             
@@ -97,7 +117,10 @@ namespace Yasas.Web
             var userStore = new UserStore<AppUser>(db);
 
             if (!roleStore.Roles.Any(r => r.Name == "Admin"))
+            {
                 await roleStore.CreateAsync(new IdentityRole() { Name = "Admin", NormalizedName = "ADMIN" });
+                await roleStore.CreateAsync(new IdentityRole() { Name = "User", NormalizedName = "USER" });
+            }
 
             var user = new AppUser
             {
@@ -122,8 +145,10 @@ namespace Yasas.Web
                 var userManager = serviceProvider.GetRequiredService<UserManager<AppUser>>();
                 var dbUser = await userManager.FindByNameAsync(user.UserName);
                 await userManager.AddToRoleAsync(dbUser, "Admin");
+                await userManager.AddToRoleAsync(dbUser, "User");
 
-                await userManager.AddClaimAsync(dbUser, new System.Security.Claims.Claim("sub", dbUser.UserName));
+                await userManager.AddClaimAsync(dbUser, new Claim("sub", dbUser.UserName));
+                //await userManager.AddClaimAsync(dbUser, new Claim("roles", "Admin"));
             }
 
             await db.SaveChangesAsync();
