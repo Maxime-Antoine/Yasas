@@ -8,7 +8,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using OpenIddict.Core;
 using OpenIddict.Models;
-using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Security.Claims;
@@ -127,7 +126,7 @@ namespace Yasas.Web.Controllers.API
 
                 // Create a new authentication ticket, but reuse the properties stored
                 // in the refresh token, including the scopes originally granted.
-                var ticket = await CreateTicketAsync(req, user, info.Properties);
+                var ticket = await _CreateTicketAsync(req, user, info.Properties);
 
                 return SignIn(ticket.Principal, ticket.Properties, ticket.AuthenticationScheme);
             }
@@ -139,9 +138,9 @@ namespace Yasas.Web.Controllers.API
                 });
         }
 
-        private async Task<AuthenticationTicket> CreateTicketAsync(
-            OpenIdConnectRequest request, AppUser user,
-            AuthenticationProperties properties = null)
+        private async Task<AuthenticationTicket> _CreateTicketAsync(
+           OpenIdConnectRequest request, AppUser user,
+           AuthenticationProperties properties = null)
         {
             // Create a new ClaimsPrincipal containing the claims that
             // will be used to create an id_token, a token or a code.
@@ -159,20 +158,10 @@ namespace Yasas.Web.Controllers.API
                 var roleNames = _db.Roles.Where(r => userWithRoles.Roles.Select(ur => ur.RoleId).Contains(r.Id)).Select(r => r.Name).ToArray();
 
                 foreach (var roleName in roleNames)
-                    identity.AddClaim("role", roleName,
-                //identity.AddClaim("roles", $"{String.Join(",", roleNames)}",
-                    new string[] { OpenIdConnectConstants.Destinations.AccessToken, OpenIdConnectConstants.Destinations.IdentityToken });
+                    identity.AddClaim("role", roleName, new string[] { OpenIdConnectConstants.Destinations.AccessToken, OpenIdConnectConstants.Destinations.IdentityToken });
+
                 principal = new ClaimsPrincipal(identity);
             }
-
-            //foreach (var claim in principal.Claims)
-            //{
-            //    // In this sample, every claim is serialized in both the access and the identity tokens.
-            //    // In a real world application, you'd probably want to exclude confidential claims
-            //    // or apply a claims policy based on the scopes requested by the client application.
-            //    claim.SetDestinations(OpenIdConnectConstants.Destinations.AccessToken,
-            //                          OpenIdConnectConstants.Destinations.IdentityToken);
-            //}
 
             // Create a new authentication ticket holding the user identity.
             var ticket = new AuthenticationTicket(principal, properties,
